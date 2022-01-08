@@ -13,8 +13,8 @@
 (defvar make-command "-k -j8 ")
 
 (setq gud-chdir-before-run nil)
-(setq gdb-command-name '("gdb"))
-(setq gud-gdb-history '("gdb eigprd"))
+(setq gdb-command-name '("gdb -i=mi"))
+(setq gud-gdb-history '("gdb -i=mi eigprd"))
 
 ;;
 ;; make
