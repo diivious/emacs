@@ -92,110 +92,124 @@
   "Highlight whitespace of various kinds."
   :group 'convenience :group 'matching
   :link `(url-link :tag "Send Bug Report"
-          ,(concat "mailto:" "drew.adams" "@" "oracle" ".com?subject=\
-show-wspace.el bug: \
-&body=Describe bug here, starting with `emacs -q'.  \
-Don't forget to mention your Emacs and library versions."))
-  :link '(url-link :tag "Other Libraries by Drew"
-          "http://www.emacswiki.org/cgi-bin/wiki/DrewsElispLibraries")
-  :link '(url-link :tag "Download"
-          "http://www.emacswiki.org/cgi-bin/wiki/show-wspace.el")
-  :link '(url-link :tag "Description"
-          "http://www.emacswiki.org/cgi-bin/wiki/ShowWhiteSpace#ShowWspace")
-  :link '(emacs-commentary-link :tag "Commentary" "show-wspace")
-  )
+                   ,(concat "mailto:" "drew.adams" "@" "oracle" ".com?subject=\show-wspace.el bug: \
+&body=describe bug here, starting with `emacs -q'.  \
+don't forget to mention your emacs and library versions."))
+  :link '(url-link :tag "other libraries by drew"
+                   "http://www.emacswiki.org/cgi-bin/wiki/drewselisplibraries")
+  :link '(url-link :tag "download"
+                   "http://www.emacswiki.org/cgi-bin/wiki/show-wspace.el")
+  :link '(url-link :tag "description"
+                   "http://www.emacswiki.org/cgi-bin/wiki/showwhitespace#showwspace")
+  :link '(emacs-commentary-link :tag "commentary" "show-wspace"))
 
-(defface pesche-tab '((t (:background "lavender")))
-  "*Face for highlighting tab characters (`C-i') in Font-Lock mode."
-  :group 'Show-Whitespace :group 'font-lock :group 'faces)
+(defface pesche-tab
+  '((t (:background "#e6e6fa"))) ;; hex code for 'lavender'
+  "face for highlighting tab characters (`c-i') in font-lock mode."
+  :group 'show-whitespace :group 'font-lock :group 'faces)
 
-(defface pesche-space '((t (:background "lavender blush")))
-  "*Face for highlighting whitespace at line ends in Font-Lock mode."
-  :group 'Show-Whitespace :group 'font-lock :group 'faces)
+(defface pesche-space
+  '((t (:background "#fff0f5"))) ;; hex code for 'lavender blush'
+  "face for highlighting whitespace at line ends in font-lock mode."
+  :group 'show-whitespace :group 'font-lock :group 'faces)
 
-(defface pesche-hardspace '((t (:background "PaleGreen")))
-  "*Face for highlighting non-breaking spaces (`\240')in Font-Lock mode."
-  :group 'Show-Whitespace :group 'font-lock :group 'faces)
+(defface pesche-hardspace
+  '((t (:background "#98fb98"))) ;; hex code for 'palegreen'
+  "face for highlighting non-breaking spaces (`\240') in font-lock mode."
+  :group 'show-whitespace :group 'font-lock :group 'faces)
 
 (defvar highlight-tabs-p nil
-  "Non-nil means font-lock mode highlights TAB characters (`C-i').")
+  "non-nil means font-lock mode highlights tab characters (`c-i').")
 
 (defvar highlight-trailing-whitespace-p nil
-  "Non-nil means font-lock mode highlights whitespace at line ends.")
+  "non-nil means font-lock mode highlights whitespace at line ends.")
 
 (defvar highlight-spaces-p nil
-  "Non-nil means font-lock mode highlights spaces (`\40').")
+  "non-nil means font-lock mode highlights spaces (`\40').")
 
 (defvar highlight-hard-spaces-p nil
-  "Non-nil means font-lock mode highlights non-breaking spaces (`\240').")
+  "non-nil means font-lock mode highlights non-breaking spaces (`\240').")
 
-;;;###autoload
 (defun toggle-tabs-font-lock ()
-  "Toggle highlighting of TABs, using face `pesche-tab'."
+  "Toggle highlighting of tabs, using face `pesche-tab'."
   (interactive)
   (if highlight-tabs-p
-      (remove-hook 'font-lock-mode-hook 'highlight-tabs)
-    (add-hook 'font-lock-mode-hook 'highlight-tabs))
+      (progn
+        (font-lock-remove-keywords nil '(("[\t]+" (0 'pesche-tab prepend))))
+        (remove-hook 'font-lock-mode-hook 'highlight-tabs t))
+    (add-hook 'font-lock-mode-hook 'highlight-tabs nil t)
+    (highlight-tabs))
   (setq highlight-tabs-p (not highlight-tabs-p))
-  (font-lock-mode)(font-lock-mode)
-  (message "TAB highlighting is now %s." (if highlight-tabs-p "ON" "OFF")))
+  (font-lock-flush)
+  (message "Tab highlighting is now %s." (if highlight-tabs-p "on" "off")))
 
-;;;###autoload
-(defun toggle-hardspace-font-lock ()
-  "Toggle highlighting of non-breaking space characters (`\240').
-Uses face `pesche-hardspace'."
-  (interactive)
-  (if highlight-hard-spaces-p
-      (remove-hook 'font-lock-mode-hook 'highlight-hard-spaces)
-    (add-hook 'font-lock-mode-hook 'highlight-hard-spaces))
-  (setq highlight-hard-spaces-p (not highlight-hard-spaces-p))
-  (font-lock-mode)(font-lock-mode)
-  (message "Hard (non-breaking) space highlighting is now %s."
-           (if highlight-hard-spaces-p "ON" "OFF")))
-
-;;;###autoload
 (defun toggle-space-font-lock ()
-  "Toggle highlighting of space characters (`\240').
-Uses face `pesche-space'."
+  "Toggle highlighting of space characters (`\40')."
   (interactive)
   (if highlight-spaces-p
-      (remove-hook 'font-lock-mode-hook 'highlight-spaces)
-    (add-hook 'font-lock-mode-hook 'highlight-spaces))
+      (progn
+        (font-lock-remove-keywords nil '(("[\040]+" (0 'pesche-space t))))
+        (remove-hook 'font-lock-mode-hook 'highlight-spaces t))
+    (add-hook 'font-lock-mode-hook 'highlight-spaces nil t)
+    (highlight-spaces))
   (setq highlight-spaces-p (not highlight-spaces-p))
-  (font-lock-mode)(font-lock-mode)
-  (message "space highlighting is now %s."
-           (if highlight-spaces-p "ON" "OFF")))
-;;;###autoload
+  (font-lock-flush)
+  (message "Space highlighting is now %s." (if highlight-spaces-p "on" "off")))
+
 (defun toggle-trailing-whitespace-font-lock ()
-  "Toggle highlighting of trailing whitespace.
-Uses face `pesche-space'."
+  "Toggle highlighting of trailing whitespace."
   (interactive)
   (if highlight-trailing-whitespace-p
-      (remove-hook 'font-lock-mode-hook 'highlight-trailing-whitespace)
-    (add-hook 'font-lock-mode-hook 'highlight-trailing-whitespace))
+      (progn
+        (font-lock-remove-keywords nil '(("[\240\040\t]+$" (0 'pesche-space t))))
+        (remove-hook 'font-lock-mode-hook 'highlight-trailing-whitespace t))
+    (add-hook 'font-lock-mode-hook 'highlight-trailing-whitespace nil t)
+    (highlight-trailing-whitespace))
   (setq highlight-trailing-whitespace-p (not highlight-trailing-whitespace-p))
-  (font-lock-mode)(font-lock-mode)
+  (font-lock-flush)
   (message "Trailing whitespace highlighting is now %s."
-           (if highlight-trailing-whitespace-p "ON" "OFF")))
+           (if highlight-trailing-whitespace-p "on" "off")))
+
+(defun toggle-hardspace-font-lock ()
+  "Toggle highlighting of non-breaking space characters (`\240')."
+  (interactive)
+  (if highlight-hard-spaces-p
+      (progn
+        (font-lock-remove-keywords nil '(("[\240]+" (0 'pesche-hardspace t))))
+        (remove-hook 'font-lock-mode-hook 'highlight-hard-spaces t))
+    (add-hook 'font-lock-mode-hook 'highlight-hard-spaces nil t)
+    (highlight-hard-spaces))
+  (setq highlight-hard-spaces-p (not highlight-hard-spaces-p))
+  (font-lock-flush)
+  (message "Hard (non-breaking) space highlighting is now %s."
+           (if highlight-hard-spaces-p "on" "off")))
+
 
 (defun highlight-tabs ()
   "Highlight tab characters (`C-i')."
-  (font-lock-add-keywords nil '(("[\t]+" (0 'pesche-tab t)))))
+  (font-lock-add-keywords nil '(("[\t]+" (0 'pesche-tab prepend))) t)
+  (font-lock-flush)
+  (font-lock-ensure))
+
 (defun highlight-spaces ()
   "Highlight space characters (`\40')."
-  (font-lock-add-keywords nil '(("[\040]+" (0 'pesche-space t)))))
+  (font-lock-add-keywords nil '(("[\040]+" (0 'pesche-space t))) t)
+  (font-lock-flush)
+  (font-lock-ensure))
+
 (defun highlight-hard-spaces ()
   "Highlight hard (non-breaking) space characters (`\240')."
-  (font-lock-add-keywords nil '(("[\240]+" (0 'pesche-hardspace t)))))
+  (font-lock-add-keywords nil '(("[\240]+" (0 'pesche-hardspace t))) t)
+  (font-lock-flush)
+  (font-lock-ensure))
+
 (defun highlight-trailing-whitespace ()
   "Highlight whitespace characters at line ends."
-  (font-lock-add-keywords nil '(("[\240\040\t]+$" (0 'pesche-space t)))))
+  (font-lock-add-keywords nil '(("[\240\040\t]+$" (0 'pesche-space t))) t)
+  (font-lock-flush)
+  (font-lock-ensure))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
-
 (provide 'show-wspace)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; show-wspace.el ends here
 
 (message "show-wspace loaded")

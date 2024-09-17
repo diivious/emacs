@@ -5,21 +5,27 @@
 ;;
 ;; hilight useless trailing whitespace tabs (\t) and such as:
 ;;
-;;(require 'font-lock)
-;;(make-face (quote font-lock-blanks-face))
-;;(set-face-background (quote font-lock-blanks-face) "Gray75")
-;;(add-hook 'font-lock-mode-hook
-;;          '(lambda()
-;;             (setq font-lock-keywords
-;;                   (append font-lock-keywords
-;;                           '(("[ \t]+$" (0 'font-lock-blanks-face t)))))))
+
 (defun highlight-wspace ()
   "Enable whitespace highlighting for tabs, spaces, and trailing whitespace."
-  (require 'whitespace) ;; Ensure that whitespace-mode is available
-  (setq-local whitespace-style '(face tabs spaces trailing))
-  (whitespace-mode 1))
+  ;; Enable highlighting for tabs
+  (when (not highlight-tabs-p)
+    (toggle-tabs-font-lock))
+  ;; Enable highlighting for spaces
+  (when (not highlight-spaces-p)
+    (toggle-space-font-lock))
+  ;; Enable highlighting for trailing whitespace
+  (when (not highlight-trailing-whitespace-p)
+    (toggle-trailing-whitespace-font-lock)))
 
-(add-hook 'font-lock-mode-hook 'highlight-wspace)
+;; Example: Use `prog-mode-hook` to enable it in programming modes
+(add-hook 'prog-mode-hook 'highlight-wspace)
+
+;; Use `text-mode-hook` to enable it in text-related modes
+(add-hook 'text-mode-hook 'highlight-wspace)
+
+;; If you want to enable it globally for all buffers
+(add-hook 'after-change-major-mode-hook 'highlight-wspace)
 
 (message "emacs-wspace loaded")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
