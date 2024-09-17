@@ -107,7 +107,7 @@ Unless called interactively, this function uses
 However, even if this variable is `t', this function will query for
 replacement if the buffer is read-only."
   (interactive)
-  (cond ((interactive-p)
+  (cond ((called-interactively-p 'interactive)
          (call-interactively 'whitespace-do-nuke-whitespace))
         (t
          (let ((flag nuke-trailing-whitespace-p))
@@ -130,10 +130,10 @@ replacement if the buffer is read-only."
         (save-match-data
           (widen)
           (goto-char (point-min))
-          (cond
-           ((or (and (eq flag t)
-                     (not buffer-orig-read-only))
-                (interactive-p))
+	  (cond
+	   ((or (and (eq flag t)
+		     (not buffer-orig-read-only))
+		(called-interactively-p 'interactive))
             (while (re-search-forward whitespace-regexp (point-max) t)
               (delete-region (match-beginning 0) (match-end 0)))
             (goto-char (point-min))

@@ -28,8 +28,6 @@
 ;; a tracking-shell, do whatever, and close the shell. Automatic cd'ing
 ;; allows direct usage of shell commands; complicated key sequences are
 ;; not neccessary for file manipulation.
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;    Multiple Simultaneous shell 
@@ -61,94 +59,76 @@
 ;; file named COPYING.  Among other things, the copyright notice
 ;; and this notice must be preserved on all copies.
 
-;;(require 'cmushell)
-
-(defun multi-shell(&optional n)
-  "Each time you invoke this, a new shell will be popped.
-See the documentation for cmushell for other details."
+(defun multi-shell (&optional n)
+  "Invoke a new shell you invoke.See documentation for `shell-mode' for details."
   (interactive)
-  (let* ((name (if (null n) "MultiShell" n)) 
-	 (buf (generate-new-buffer name)) 
-	 (bufnam (buffer-name buf)))
-    (cond ((not (comint-check-proc bufnam))
-	   (let* ((prog (or explicit-shell-file-name
-			    (getenv "ESHELL")
-			    (getenv "SHELL")
-			    "/bin/sh"))		     
-		  (name (file-name-nondirectory prog))
-		  (startfile (concat "~/.emacs_" name))
-		  (xargs-name (intern-soft (concat "explicit-" name "-args"))))
-	     (save-excursion 
-	       (set-buffer (apply 'multi-comint bufnam prog
-				  (if (file-exists-p startfile) startfile)
-				  (if (and xargs-name (boundp xargs-name))
-				      (symbol-value xargs-name)
-				    '("-i"))))
-	       (cmushell-mode)))))
+  (let* ((name (if (null n) "MultiShell" (format "MultiShell-%s" n))) ;; Use descriptive name format for numbered shells
+         (buf (generate-new-buffer name))
+         (bufnam (buffer-name buf)))
+    (unless (comint-check-proc bufnam)
+      (let* ((prog (or explicit-shell-file-name
+                       (getenv "ESHELL")
+                       (getenv "SHELL")
+                       "/bin/sh"))
+             (shell-name (file-name-nondirectory prog)) ;; Rename to avoid collision with outer `name`
+             (startfile (concat "~/.emacs_" shell-name))
+             (xargs-name (intern-soft (concat "explicit-" shell-name "-args"))))
+        (with-current-buffer (apply 'multi-comint (list bufnam prog
+                                                       (if (file-exists-p startfile) startfile nil)
+                                                       (if (and xargs-name (boundp xargs-name))
+                                                           (symbol-value xargs-name)
+                                                         '("-i"))))
+          (shell-mode)))) ;; Use shell-mode instead of cmushell-mode
     bufnam))
 
-
 (defun multi-comint (name program &optional startfile &rest switches)
+  "Create a comint process in a buffer named NAME running PROGRAM.
+Optional argument STARTFILE is the file to source in the new shell.
+SWITCHES are passed to the shell."
   (let* ((buffer (get-buffer-create name))
-	 (proc (get-buffer-process buffer)))
-    ;; If no process, or nuked process, crank up a new one and put buffer in
-    ;; comint mode. Otherwise, leave buffer and existing process alone.
-    (cond ((or (not proc) (not (memq (process-status proc) '(run stop))))
-	   (save-excursion
-	     (set-buffer buffer)
-	     (comint-mode)) ; Install local vars, mode, keymap, ...
-	   (comint-exec buffer name program startfile switches)))
+         (proc (get-buffer-process buffer)))
+    (unless (and proc (memq (process-status proc) '(run stop)))
+      (with-current-buffer buffer
+        (comint-mode) ;; Set comint-mode and initialize buffer
+        (comint-exec buffer name program startfile switches)))
     buffer))
 
-(defconst tracking-shell-name "*Tracking-Shell*")
-(defconst tracking-shell-name-nostar "Tracking-Shell")
+(defconst tracking-shell-name "*Tracking-Shell*"
+  "Name of the tracking shell buffer.")
+
+(defconst tracking-shell-name-nostar "Tracking-Shell"
+  "Name of the tracking shell buffer without the star.")
 
 (defvar tracking-shell-other-window t
-  "*Whether tracking shell should appear in current window or not")
+  "Whether tracking shell should appear in current window or not.")
 
-;; When invoked from a buffer, Tracking-Shell cd's to that buffers directory.
-;; Thus to do something in the current directory of a buffer, pop up
-;; a tracking-shell, do whatever, and close the shell. Automatic cd'ing
-;; allows direct usage of shell commands; complicated key sequences are
-;; not neccessary for file manipulation.
-
-(defun tracking-shell()
-  "When invoked from a buffer, if Tracking-Shell does
-not exist, it is created. If it exists, a cd is sent to the shell
-to synchronize the directory to that of the buffer in which this function is
-called. See the documentation of cmushell for other details."
+(defun tracking-shell ()
+  "Switch to tracking shell, Sync shell's dir with buffer if shell isrunning."
   (interactive)
-  (cond ((not (comint-check-proc tracking-shell-name))
-	 (let* ((prog (or explicit-shell-file-name
-			  (getenv "ESHELL")
-			  (getenv "SHELL")
-			  "/bin/sh"))		     
-		(name (file-name-nondirectory prog))
-		(startfile (concat "~/.emacs_" name))
-		(xargs-name (intern-soft (concat "explicit-" name "-args"))))
-	   (set-buffer (apply 'make-comint tracking-shell-name-nostar prog
-			      (if (file-exists-p startfile) startfile)
-			      (if (and xargs-name (boundp xargs-name))
-				  (symbol-value xargs-name)
-				'("-i"))))
-	   (cmushell-mode)))
-	(t 
-	 (let ((dir default-directory))
-	   (comint-send-string 
-	    (get-buffer-process tracking-shell-name)
-	    (concat "cd " dir "\n"))
-	   (save-excursion
-	     (set-buffer tracking-shell-name)
-	     (cd dir)))))
+  (let ((tracking-shell-buffer (get-buffer tracking-shell-name)))
+    (unless (comint-check-proc tracking-shell-name)
+      (let* ((prog (or explicit-shell-file-name
+                       (getenv "ESHELL")
+                       (getenv "SHELL")
+                       "/bin/sh"))
+             (name (file-name-nondirectory prog))
+             (startfile (concat "~/.emacs_" name))
+             (xargs-name (intern-soft (concat "explicit-" name "-args"))))
+        (with-current-buffer (apply 'make-comint tracking-shell-name-nostar prog
+                                    (if (file-exists-p startfile) startfile nil)
+                                    (if (and xargs-name (boundp xargs-name))
+                                        (symbol-value xargs-name)
+                                      '("-i"))))
+          (shell-mode)))) ;; Create shell if not running
+    (let ((dir default-directory))
+      (comint-send-string (get-buffer-process tracking-shell-name)
+                          (concat "cd " dir "\n"))
+      (with-current-buffer tracking-shell-name
+        (cd dir))) ;; Update directory
+  ;; Switch to the shell buffer
   (if tracking-shell-other-window
       (switch-to-buffer-other-window tracking-shell-name)
-  (switch-to-buffer tracking-shell-name)))
-
-;; example of using tracking shell
-;; (global-set-key "\C-c\C-s" 'tracking-shell)
-;;            Open tracking shell window
-;; (global-set-key "\C-c\C-t" 'delete-window) ;; could use C-x 0
-;;           Close tracking shell window
+    (switch-to-buffer tracking-shell-name)))
 
 (provide 'multishell)
 

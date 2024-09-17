@@ -193,15 +193,16 @@ If omitted, FRAME defaults to the currently selected frame."
 (if (not (load "tshell" t t nil))
     (require 'shell))
 
- ;;
- ;; shell mode settings
- ;;
-(add-hook
- 'shell-mode-hook
- '(lambda () (define-key shell-mode-map "\C-a" 'beginning-of-line)))
-(add-hook
- 'tshell-mode-hook
- '(lambda () (define-key tshell-mode-map "\C-a" 'beginning-of-line)))
+;;
+;; shell mode settings
+;;
+(defun my-shell-mode-keybindings ()
+  "Custom keybindings for shell-like modes."
+  (define-key (current-local-map) "\C-a" 'beginning-of-line))
+
+(add-hook 'shell-mode-hook 'my-shell-mode-keybindings)
+(add-hook 'tshell-mode-hook 'my-shell-mode-keybindings)
+
 (setq tshell-input-autoexpand nil)
 
 (defun multi-shell (&optional shellnum)
@@ -407,13 +408,17 @@ or to \\[buffer-name] if it has no file"
       (progn (backward-sexp 1) (point)))))
 ;;
 ;; Perl
-;;
-(setq auto-mode-alist (nconc '(("\\.cgi$" . perl-mode)) auto-mode-alist))
-(setq auto-mode-alist (nconc '(("\\.pl$" . perl-mode)) auto-mode-alist))
-(setq auto-mode-alist (nconc '(("\\.perl$" . perl-mode)) auto-mode-alist))
-(add-hook
- 'perl-mode-hook
- '(lambda () (modify-syntax-entry ?\' " " perl-mode-syntax-table)))
+;; Add Perl-related file extensions to auto-mode-alist
+(setq auto-mode-alist
+      (append '(("\\.cgi\\'" . perl-mode)
+                ("\\.pl\\'" . perl-mode)
+                ("\\.perl\\'" . perl-mode))
+              auto-mode-alist))
+
+;; Modify Perl mode syntax entry for single quote
+(add-hook 'perl-mode-hook
+          (lambda ()
+            (modify-syntax-entry ?\' " " (syntax-table))))
 
 (message "emacs-cmn loaded")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

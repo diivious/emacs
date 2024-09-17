@@ -13,10 +13,13 @@
 ;;             (setq font-lock-keywords
 ;;                   (append font-lock-keywords
 ;;                           '(("[ \t]+$" (0 'font-lock-blanks-face t)))))))
-(require 'show-wspace)
-(add-hook 'font-lock-mode-hook 'highlight-tabs)
-(add-hook 'font-lock-mode-hook 'highlight-spaces)
-(add-hook 'font-lock-mode-hook 'highlight-trailing-whitespace)
+(defun highlight-wspace ()
+  "Enable whitespace highlighting for tabs, spaces, and trailing whitespace."
+  (require 'whitespace) ;; Ensure that whitespace-mode is available
+  (setq-local whitespace-style '(face tabs spaces trailing))
+  (whitespace-mode 1))
+
+(add-hook 'font-lock-mode-hook 'highlight-wspace)
 
 (message "emacs-wspace loaded")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -2,18 +2,22 @@
 ;;
 ;; emacs codeing style init file
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'cc-mode)  ;; Ensure cc-mode is loaded
 
 (defun format-function ()
-  "According to IOS rules, indent, remove whitespace and tabify function, from anywhere inside function, or on the function name"
+  "C rules: indent, remove whitespace, and tabify within the current function."
   (interactive)
-  (c-mark-function)
-  (c-indent-line-or-region)
-  (c-mark-function)
-  (whitespace-cleanup-region (region-beginning) (region-end))
-  (c-mark-function)
-  (tabify (region-beginning) (region-end))
-)
-
+  ;; Mark the function once and use its region boundaries for all operations
+  (save-excursion
+    (c-mark-function)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      ;; Indent the region
+      (c-indent-region beg end)
+      ;; Clean up whitespace in the region
+      (whitespace-cleanup-region beg end)
+      ;; Tabify the region
+      (tabify beg end))))
 ;;
 ;; sets c++ mode for all the following files
 (setq auto-mode-alist
@@ -84,9 +88,9 @@ c-mode-hook '(lambda ()
   "diivious c-style for cc-mode")
 
 (add-hook 'c-mode-common-hook
-	  '(lambda ()
-	     (c-add-style "DIIVIOUS" diivious-c-style)
-	     (c-set-style "DIIVIOUS")))
+          (lambda ()
+            (c-add-style "DIIVIOUS" diivious-c-style)
+            (c-set-style "DIIVIOUS")))
 
 (message "emacs-style loaded")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

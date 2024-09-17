@@ -15,7 +15,7 @@
 ;;
 ;; color.....
 ;;
-(add-hook 'find-file-hooks 'turn-on-font-lock)
+(add-hook 'find-file-hook 'turn-on-font-lock)
 (add-hook 'c-mode-hook 'turn-on-font-lock)
 (add-hook 'dired-mode-hook 'turn-on-font-lock)
 (add-hook 'html-mode-hook 'turn-on-font-lock)

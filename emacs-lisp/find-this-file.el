@@ -205,36 +205,36 @@ file will be created, unless find-this-file-usually-creates is non-nil."
   "List of directories (strings) where standard C++ include files reside.")
 
 (defun c-mode-search-path ()
-  "Function which determines the search path used by find-this-file.\n\
-At the end of the search path is /usr/local/lib/gcc-include and\n\
-/usr/include.  If the file extension is .C or .H, the C++ include\n\
-directories are searched just before this, and if the filename is\n\
-quoted, './' is searched.  The front of the search path is determined\n\
-by consulting the compile-command; if no search path can be determined\n\
+  "Function which determines the search path used by find-this-file.
+At the end of the search path is /usr/local/lib/gcc-include and
+/usr/include. If the file extension is .C or .H, the C++ include
+directories are searched just before this, and if the filename is
+quoted, './' is searched. The front of the search path is determined
+by consulting the compile-command; if no search path can be determined
 then buffer-include-path is used instead."
-  (let (include-directories c-include-path)
+  (let (include-directories c-include-path file-prefixes) ;; Declare file-prefixes locally
     (setq include-directories
-	  (cond
-	   ((memq (last-char-in-string buffer-file-name) '(?C ?H))
-	    c++-code-includes)
-	   (t ; (memq (last-char-in-string buffer-file-name) '(?c ?h))
-	    c-code-includes)))
+          (cond
+           ((memq (last-char-in-string buffer-file-name) '(?C ?H))
+            c++-code-includes)
+           (t
+            c-code-includes)))
     (setq c-include-path
-	  (or 
-	   (find-c-include-path-from-compile-command)
-	   buffer-include-path))
+          (or 
+           (find-c-include-path-from-compile-command)
+           buffer-include-path))
     (save-excursion
       (end-of-line)
       (re-search-backward "[\">]")
       (cond
        ((looking-at "\"")
-	(setq file-prefixes
-	      (cons (directory-file-name default-directory)
-		    (append include-directories c-include-path))))
+        (setq file-prefixes
+              (cons (directory-file-name default-directory)
+                    (append include-directories c-include-path))))
        (t
-	(setq file-prefixes
-	      (append include-directories c-include-path)))))
-     file-prefixes))
+        (setq file-prefixes
+              (append include-directories c-include-path)))))
+    file-prefixes)) ;; Return file-prefixes
 
 ;; Utility functions used by c-mode-search-path
 

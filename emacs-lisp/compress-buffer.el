@@ -9,14 +9,24 @@
 ;; Status          : OK.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 (defun compress-buffer ()
-  "Kills trailing whitespace and tabifies."
+  "Remove trailing whitespace, untabify, and then tabify the current buffer."
   (interactive)
   (message "Compressing . . .")
-  (beginning-of-buffer)
-  (untabify-file)
-  (perform-replace " +$" "" nil t nil)
+  ;; Move to the beginning of the buffer
+  (goto-char (point-min))
+
+  ;; Untabify the entire buffer
+  (untabify (point-min) (point-max))
+
+  ;; Remove trailing whitespace
+  (while (re-search-forward "[ \t]+$" nil t)
+    (replace-match "" nil nil))
+
+  ;; Tabify the entire buffer
   (tabify (point-min) (point-max))
-  (message ""))
+
+  (message "Compression done."))
 
 (message "emacs-cmn loaded")

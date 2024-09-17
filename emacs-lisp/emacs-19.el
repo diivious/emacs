@@ -14,16 +14,16 @@
   (if (and (not noninteractive)
 	   auto-fill-default)
       (auto-fill-mode 1)))
-  
-(if (not (memq 'initialize-auto-fill-mode find-file-hooks))
-    (setq find-file-hooks (cons 'initialize-auto-fill-mode find-file-hooks)))
 
- ;;
- ;; auto-show-mode enable automatic horizontal scrolling, when lines
- ;; are truncated so that the user need not use C-x< and C-x> to
- ;; manually move the view.
- ;;
-(auto-show-mode t)
+(add-hook 'find-file-hook 'initialize-auto-fill-mode)
+
+;;
+;; enable automatic horizontal scrolling, when lines
+;; are truncated so that the user need not use C-x< and C-x> to
+;; manually move the view.
+;;
+(setq truncate-lines t)
+(setq auto-hscroll-mode 'current-line)
 
 ;;
 ;; alow eval-expression (default binding on ESC ESC)

@@ -14,8 +14,7 @@
 	   auto-fill-default)
       (auto-fill-mode 1)))
   
-(if (not (memq 'initialize-auto-fill-mode find-file-hooks))
-    (setq find-file-hooks (cons 'initialize-auto-fill-mode find-file-hooks)))
+(add-hook 'find-file-hook 'initialize-auto-fill-mode)
 
 (message "emacs-21 loaded")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

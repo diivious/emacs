@@ -88,12 +88,6 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;;; Code:
-
-(and (< emacs-major-version 20) (eval-when-compile (require 'cl))) ;; when, push
-
-;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defgroup Show-Whitespace nil
   "Highlight whitespace of various kinds."
   :group 'convenience :group 'matching
@@ -122,7 +116,6 @@ Don't forget to mention your Emacs and library versions."))
 (defface pesche-hardspace '((t (:background "PaleGreen")))
   "*Face for highlighting non-breaking spaces (`\240')in Font-Lock mode."
   :group 'Show-Whitespace :group 'font-lock :group 'faces)
-
 
 (defvar highlight-tabs-p nil
   "Non-nil means font-lock mode highlights TAB characters (`C-i').")
