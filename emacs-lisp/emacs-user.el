@@ -19,6 +19,7 @@
 
 (defvar gdb-many-windows)  ;; Declare the variable globally (optional)
 
+
 (setq
 ; emacs with the '-q' flag read .emacs and evaluate each lisp sexp
 ; manually step-by-step...

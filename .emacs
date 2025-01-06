@@ -2,7 +2,6 @@
 ;
 ; Donnie Savage's .emacs initialization file
 ;
-(require 'cl)
 (defvar *emacs-load-start* (current-time))
 
 (defvar my-login-name (user-login-name)
